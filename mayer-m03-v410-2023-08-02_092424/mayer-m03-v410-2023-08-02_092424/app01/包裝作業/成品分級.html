@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta content="text/html"/>
+    <meta charset="utf-8"/>
+    <title>美亞報工!</title>
+    <meta http-equiv="Content-Type" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+     </head> 
+<style>
+      .main{
+        /*水平置中*/      
+        display:flex;
+        /*垂直置中*/
+        justify-content:center;
+        text-align:center;
+  }
+       .list{
+         /*水平置中*/      
+        display:flex;
+        /*垂直置中*/
+        justify-content:center;
+        text-align:center;
+        border-radius: 2px;  
+    }  
+      
+  </style>
+  <body onload="loadBody()">
+    <div class="main">
+      <h>
+        <img src="https://cdn.glitch.global/d3fc7112-b364-45f9-8eca-982543985e7b/logo21.png?v=1676527840620" width="280px"  height="120px"/><br>
+        <font size="6">包裝作業-成品分級</font>
+        <table style = "font-size:20px;">
+         <tr>
+          <td>
+            工號:<span  id="show1"></span>
+            姓名:<span id="show2"></span>
+            機台:<span id="show3"></span>
+            班別日期:<span id="show5"></span>
+            班別:<span id="show4"></span>                
+           </td>
+         </tr>  
+        </table> 
+      </h>  
+    </div>  
+      <div class="list">
+        <form>       
+          <table>
+            <tbody>
+              <tr>   
+                <td><span style="font-size:20px" color="blue">在製品分級</span>
+                    <input  id="wip" style="width:400px;height:45px;font-size:20px"  placeholder="請輸入在製品拆捆條碼"  onchange="getSplId()"/>
+                    <span style="font-size:20px" color="blue">原件數</span>
+                    <input id ="oldPiece" type="number" disabled = "disabled" style="width:150px;height:45px;font-size:20px;text-align:right"/>
+                    <span style="font-size:20px" color="blue">重量</span>
+                    <input id ="oldWeight" type="number" disabled = "disabled" style="width:150px;height:45px;font-size:20px; text-align: right"/></td>
+              </tr>             
+              <tr>
+                <td><span style="font-size:20px" color="blue">Ｔ１產編</span>                    
+                    <input  id="prod1" style="width:400px;height:45px;font-size:20px">
+                    <span style="font-size:20px" color="blue">規格+尺寸</span>
+                    <input  id="spec1" value="" style="width:400px;height:45px;font-size:20px"  readonly /></td>
+              </tr> 
+              <tr>
+                 <td><span style="font-size:20px" color="blue">新件數</span>
+                     <input id ="Piece1" type="number" style="width:150px;height:45px;font-size:20px;text-align:right"/>
+                     <span style="font-size:20px" color="blue">重量</span>
+                     <input id ="Weight1" type="number" style="width:150px;height:45px;font-size:20px; text-align:right"/></td>
+              </tr>                       
+              <tr>                          
+                <td><span style="font-size:20px" color="blue">Ｔ２產編</span>
+                    <input  id="prod2" style="width:400px;height:45px;font-size:20px"/>
+                    <span style="font-size:20px" color="blue">規格+尺寸</span>
+                    <input  id="spec2" style="width:400px;height:45px;font-size:20px"  readonly /></td>
+              </tr>
+              <tr>
+                <td><span style="font-size:20px" color="blue">新件數</span>
+                    <input id ="Piece2" type="number" style="width:150px;height:45px;font-size:20px;text-align:right"/>
+                    <span style="font-size:20px" color="blue">重量</span>
+                    <input id ="Weight2" type="number" style="width:150px;height:45px;font-size:20px; text-align:right"/></td>
+              </tr> 
+              <tr>                          
+                <td><span style="font-size:20px" color="blue">接頭產編</span>
+                    <input  id="prod3" style="width:400px;height:45px;font-size:20px"/>
+                    <span style="font-size:20px" color="blue">規格+尺寸</span>
+                    <input  id="spec3" style="width:400px;height:45px;font-size:20px"  readonly /></td>
+              </tr>
+              <tr>
+                <td><span style="font-size:20px" color="blue">新件數</span>
+                    <input id ="Piece3" type="number" style="width:150px;height:45px;font-size:20px;text-align:right"/>
+                    <span style="font-size:20px" color="blue">重量</span>
+                    <input id ="Weight3" type="number" style="width:150px;height:45px;font-size:20px; text-align:right"/></td>
+              </tr>             
+            </tbody>
+          </table>
+        </form>  
+    </div>   
+      <h> 
+         <center>
+          <input type="reset" value="重新輸入" style="width:200px;height:45px;font-size:20px;">
+          <input type="button"  value="列印及上傳"  onclick="load()" style="width:200px;height:45px;font-size:20px;">            
+          <input type="button" onclick="back()" value ="回前一頁"  style="width:180px;height:45px;font-size:20px; color:red;"><br/><br/>              
+          <script>
+              var txt ="日期:";
+              document.write(txt.big());           
+              date = new Date().toLocaleDateString();
+              document.write(date.big());
+            </script>
+        </center>
+       </h>                
+   
+   <script>
+       
+        var strUrl = window.location.search;  
+        var getPara,paraVal;
+        var aryPara = [];
+        var userName, requestURL,loadurl;
+        var request,jsonObj,dateStr;
+        var wipSplId,headId,midId,lastId,lastId1;
+        var pieceId,weightId;
+        var pieceOutput0,weightOutput0;
+        var pieceOutput1,weightOutput1;
+        var pieceOutput2,weightOutput2; 
+        var pieceOutput3,weightOutput3; 
+        var pieceStr1,weightStr1;
+        var pieceStr2,weightStr2;     
+        var pieceStr3,weightStr3;
+        var getOrder,getMachine,getDate,getGroup,getUsr;
+        var loadurl,url;
+        var requestUrl,getjsonObj;        
+        var getPrd,getMark,getRec; 
+        var prod0, prod1, prod2, prod3;
+        var ordId, ordNo;
+                              
+       loadBody = function (){                         
+          if (strUrl != -1) 
+            var getSearch = strUrl.split("?");
+            getPara = getSearch[1].split("&");
+              for (i = 0; i < getPara.length; i++){
+                 paraVal = getPara[i].split("=");
+                 aryPara.push(paraVal[0]);                
+                 aryPara[paraVal[0]]=paraVal[1];
+               }              
+                    
+               document.getElementById("show1").innerHTML=aryPara.userId;
+               userName = decodeURIComponent(aryPara.userName);
+               document.getElementById("show2").innerHTML=userName;
+               document.getElementById("show3").innerHTML=aryPara.machineId;
+               document.getElementById("show4").innerHTML=aryPara.groupId; 
+               document.getElementById("show5").innerHTML=aryPara.dateId;
+               document.getElementById("wip").focus();
+         }
+     
+        function load(){  
+            loadurl = "http://172.16.1.222:10010/web/services/WEB10R/";    
+                       
+              pieceOutput1 = document.getElementById("Piece1").value;
+              pieceOutput2 = document.getElementById("Piece2").value;
+              pieceOutput3 = document.getElementById("Piece3").value;
+              weightOutput1 = document.getElementById("Weight1").value;
+              weightOutput2 = document.getElementById("Weight2").value;  
+              weightOutput3 = document.getElementById("Weight3").value;  
+          
+
+                  pieceStr1 = pieceOutput1.toString().padStart(5,'0');                               
+                  pieceStr2 = pieceOutput2.toString().padStart(5,'0');  
+                  pieceStr3 = pieceOutput3.toString().padStart(5,'0');  
+                  weightStr1 = weightOutput1.toString().padStart(6,'0');              
+                  weightStr2 = weightOutput2.toString().padStart(6,'0'); 
+                  weightStr3 = weightOutput3.toString().padStart(6,'0');
+               
+              var wipId = "ADD" +  getMachine + getDate + getGroup +  getUsr  + ordId + ordNo + prod0 + piece0 + weight0
+                        + ordId +  ordNo  + prod1 + pieceStr1 + weightStr1 
+                        + ordId +  ordNo  + prod2 + pieceStr2 + weightStr2
+                        + ordId +  ordNo  + prod3 + pieceStr3 + weightStr3;                                                            
+              url = loadurl + wipId;                          
+
+            if(window.XMLHttpRequest){    
+              request=new XMLHttpRequest();                    
+              }                 
+               request.onreadystatechange = function(){
+                 if (request.readyState == 4  ) 
+                   {
+                      jsonObj = JSON.parse(request.responseText);     
+                      markOutput = jsonObj.chgP59bDta.chgP59bTxt;
+                      reasonOutput = jsonObj.chgP59bDta.chgP59bRes; 
+                                                        
+                        if (markOutput ==="SUC"){                                             
+                           alert(reasonOutput); 
+                           location.reload();                                                                                                                    
+                         } 
+                              else 
+                                if(markOutput ==="FAU"){
+                                  alert(reasonOutput);} 
+                      }          
+                            
+                    }
+                 
+                 request.open("GET" , url, true);
+                 request.send();                      
+            }    
+          
+          //************************************************************************************************
+          //* onchange() 
+          //************************************************************************************************
+          function getSplId(){              
+            wipSplId=document.getElementById("wip").value; 
+            headId = wipSplId.substr(0,3);  
+            ordId  = wipSplId.substr(4,3);
+            ordNo  = wipSplId.substr(8,9);          
+            wip  = wipSplId.substr(4,12);            
+            prod0 = wipSplId.substr(44,26);
+            prod1 = wipSplId.substr(44,26);
+            prod2 = "KHT2" + wipSplId.substr(48,20) + "__";
+            prod3 = wipSplId.substr(44,17) + "5" + wipSplId.substr(62,8);   
+                
+            pieceId = wipSplId.substr(18,5);
+            weightId = wipSplId.substr(24,6); 
+            piece0   = wipSplId.substr(18,5);
+            weight0  = wipSplId.substr(24,6);
+
+            console.log("pieceId-->"+ pieceId);      
+           
+            if (headId != "PRT" ){
+                alert("資料不符");
+                return;} 
+            
+                pieceId = pieceId.replace(/^0+/g,"");           
+                document.getElementById("oldPiece").value = pieceId; 
+                piece1 = pieceId;         
+                console.log("piece1-->"+ piece1);  
+                weightId = weightId.replace(/^0+/g,"");
+                document.getElementById("oldWeight").value= weightId;   
+                weight1 = weightId;     
+
+                document.getElementById("prod1").value    = prod1;   
+                document.getElementById("Piece1").value   = piece1;
+                document.getElementById("Weight1").value  = weight1; 
+                document.getElementById("prod2").value    = prod2; 
+                document.getElementById("Piece2").value   = "0";
+                document.getElementById("Weight2").value  = "0"; 
+                document.getElementById("prod3").value    = prod3;    
+                document.getElementById("Piece3").value   = "0";
+                document.getElementById("Weight3").value  = "0";                  
+       
+             getOrder = wipSplId.substr(31,12);
+             getMachine = wipSplId.substr(87,3);
+             getDate = wipSplId.substr(71,8);
+             getGroup = wipSplId.substr(91,2);
+             getUsr = wipSplId.substr(94,5);
+             var geturlx = "http://172.16.1.222:10010/web/services/WEB10R/";        
+             geturl = geturlx + getOrder + prod1 + aryPara.machineId + aryPara.dateId + aryPara.groupId ;
+             getSpecId01( geturl );
+             geturl = geturlx + getOrder + prod2 + aryPara.machineId + aryPara.dateId + aryPara.groupId ;
+             getSpecId02( geturl );
+             geturl = geturlx + getOrder + prod3 + aryPara.machineId + aryPara.dateId + aryPara.groupId ;
+             getSpecId03( geturl );
+
+             document.getElementById("Piece1").focus();
+
+             }  
+     
+          
+          function getSpecId01(prod){                                                 
+             var prodUrl   = prod;
+             if (window.XMLHttpRequest){    
+                requestUrl=new XMLHttpRequest();
+                }  
+                   requestUrl.onreadystatechange = function(){
+                   if (requestUrl.readyState == 4  ) { 
+                      var jsonObj = JSON.parse(requestUrl.responseText); 
+                      getMark = jsonObj.chkPrdDta.prdMrkTxt;
+                      getRec = jsonObj.chkPrdDta.prdResTxt;      
+                      if (getMark ==="SUC"){ document.getElementById("spec1").value=jsonObj.chkPrdDta.prdSize; } 
+                         else { if(getMark ==="FAU"){ alert(prdResTxt); } }
+                      document.getElementById("Piece1").focus();
+                      }     
+                    }   
+                 requestUrl.open("GET" , prodUrl, true);
+                 requestUrl.send();              
+               }
+     
+
+          function getSpecId02(prod){                                                 
+             var prodUrl   = prod;
+             if (window.XMLHttpRequest){    
+                requestUrl02=new XMLHttpRequest();
+                }  
+                   requestUrl02.onreadystatechange = function(){
+                   if (requestUrl02.readyState == 4  ) { 
+                      var jsonObj02 = JSON.parse(requestUrl02.responseText); 
+                      getMark = jsonObj02.chkPrdDta.prdMrkTxt;
+                      getRec = jsonObj02.chkPrdDta.prdResTxt;      
+                      if (getMark ==="SUC"){ document.getElementById("spec2").value=jsonObj02.chkPrdDta.prdSize; } 
+                         else { if(getMark ==="FAU"){ document.getElementById("spec2").value="***產品編號異常***";
+                                                      alert(jsonObj02.chkPrdDta.prdResTxt); } }
+                      document.getElementById("Piece1").focus();
+                      }     
+                    }   
+                 requestUrl02.open("GET" , prodUrl, true);
+                 requestUrl02.send();              
+               }
+     
+
+          function getSpecId03(prod){                                                 
+             var prodUrl   = prod;
+             if (window.XMLHttpRequest){    
+                requestUrl03=new XMLHttpRequest();
+                }  
+                   requestUrl03.onreadystatechange = function(){
+                   if (requestUrl03.readyState == 4  ) { 
+                      var jsonObj03 = JSON.parse(requestUrl03.responseText); 
+                      getMark = jsonObj03.chkPrdDta.prdMrkTxt;
+                      getRec = jsonObj03.chkPrdDta.prdResTxt;      
+                      if (getMark ==="SUC"){ document.getElementById("spec3").value=jsonObj03.chkPrdDta.prdSize; } 
+                         else { if(getMark ==="FAU"){ document.getElementById("spec3").value="***產品編號異常***";
+                                                      alert(jsonObj03.chkPrdDta.prdResTxt); } }
+                      document.getElementById("Piece1").focus();
+                      }     
+                    }   
+                 requestUrl03.open("GET" , prodUrl, true);
+                 requestUrl03.send();              
+               }
+     
+          function back(){                                        
+            requestURL="http://172.16.2.47/webbi/app01/包裝作業/包裝作業.html";
+            requestURL = requestURL+"?" + "userId=" + aryPara.userId + "&userName=" + userName + "&machineId=" + aryPara.machineId +
+                         "&dateId=" + aryPara.dateId +"&groupId=" + aryPara.groupId;    
+            var newWindow=window.open(requestURL,'_self');}  
+                              
+    </script>  
+    </body>
+  </html>
